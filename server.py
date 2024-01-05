@@ -1,5 +1,9 @@
+from flask import Flask
+from flask import request
 import socket
 import binascii
+
+app = Flask(__name__)
 
 def wake_on_lan(mac_address):
     # Cria um socket UDP
@@ -31,4 +35,13 @@ def wake_on_lan(mac_address):
 
 # Endereço MAC do seu PC
 #AC-22-0B-2E-13-5C
-wake_on_lan('AC-22-0B-2E-13-5C')
+# wake_on_lan('AC-22-0B-2E-13-5C')
+
+@app.route('/wake-on-lan', methods=['POST'])
+def wake_on_lan_endpoint():
+    mac_address = request.json.get('mac_address')
+    wake_on_lan(mac_address)
+    return 'Magic Packet enviado com sucesso!'
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
