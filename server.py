@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from flask_sslify import SSLify
 import socket
 import binascii
 
 app = Flask(__name__)
 sslify = SSLify(app)
+CORS(app)
 
 def wake_on_lan(mac_address):
-    # Cria um socket UDP
+    # Código para enviar o Magic Packet (mantido igual ao seu código)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
@@ -39,10 +41,7 @@ def wake_on_lan_endpoint():
 
     # Configurar cabeçalhos CORS
     response = jsonify({'message': 'Magic Packet enviado com sucesso!'})
-    response.headers.add('Access-Control-Allow-Origin', 'https://wender103.github.io')
-    response.headers.add('Access-Control-Allow-Methods', 'POST')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
-
+    
     return response
 
 if __name__ == '__main__':
