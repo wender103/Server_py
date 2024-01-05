@@ -2,8 +2,10 @@ from flask import Flask
 from flask import request
 import socket
 import binascii
+from flask_sslify import SSLify
 
 app = Flask(__name__)
+sslify = SSLify(app)
 
 def wake_on_lan(mac_address):
     # Cria um socket UDP
