@@ -111,6 +111,6 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 PORT = 8000
 Handler = MyRequestHandler
 
-with socketserver.TCPServer(("", PORT), Handler) as httpd:
+with socketserver.TCPServer(("0.0.0.0", PORT), Handler) as httpd:
     print(f"Servindo na porta {PORT}")
     httpd.serve_forever()
