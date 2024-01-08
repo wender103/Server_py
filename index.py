@@ -1,71 +1,111 @@
-from flask import Flask, jsonify
-from flask_cors import CORS
+import http.server
+import socketserver
 import subprocess
 import json
 import binascii
 import socket
+from urllib.parse import parse_qs
 
-app = Flask(__name__)
-CORS(app)
+class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/open_spotify':
+            # Adicionar cabeçalhos CORS
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
 
-@app.route('/open_spotify', methods=['GET', 'POST', 'OPTIONS'])
-def open_spotify():
-    handle_open_spotify()
-    return jsonify({"status": "success", "message": "Conexão estabelecida"})
+            response_data = {"status": "success", "message": "Conexão estabelecida"}
+            self.wfile.write(json.dumps(response_data).encode())
+        elif self.path == '/ligar_pc':
+            # Adicionar cabeçalhos CORS
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+            self.end_headers()
 
-@app.route('/ligar_pc', methods=['GET', 'POST', 'OPTIONS'])
-def ligar_pc():
-    handle_ligar_pc()
-    return jsonify({"status": "success", "message": "PC ligado"})
+            # Ligar o PC aqui
+            self.ligar_pc()
 
-def handle_open_spotify():
-    add_cors_headers()
-    # Lógica para manipular a rota /open_spotify
+            response_data = {"status": "success", "message": "PC ligado"}
+            self.wfile.write(json.dumps(response_data).encode())
+        else:
+            # Servir arquivos estáticos
+            super().do_GET()
 
-def handle_ligar_pc():
-    add_cors_headers()
-    # Lógica para manipular a rota /ligar_pc
-    ligar_pc()
+    def do_OPTIONS(self):
+        # Adicionar cabeçalhos CORS para lidar com solicitações OPTIONS
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
 
-def add_cors_headers():
-    # Adiciona cabeçalhos CORS
-    headers = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-    }
-    for key, value in headers.items():
-        app.response_class.default_headers[key] = value
+    def do_POST(self):
+        if self.path == '/open_spotify':
+            # Obter o corpo da solicitação
+            content_length = int(self.headers['Content-Length'])
+            post_data = self.rfile.read(content_length)
+            comando = json.loads(post_data)
 
-def ligar_pc():
-    # Código para ligar o PC
-    # AC-22-0B-2E-13-5C
-    # 00-1A-7D-DA-71-10
-    mac_address = 'AC-22-0B-2E-13-5C'
-    # Cria um socket UDP
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            # Adicionar cabeçalhos CORS
+            self.send_response(200)
+            self.send_header("Content-type", "application/json")
+            self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
+            self.end_headers()
 
-    # Endereço de broadcast e porta padrão para WoL
-    broadcast_address = ('192.168.1.255', 7)
+            # Analisar o objeto e realizar ações correspondentes
+            if comando.get('Comando') == 'Abrir' and comando.get('Programa') == 'Spotify':
+                # Comando para abrir o Spotify no Windows (ajuste conforme necessário)
+                command = "start spotify"
+                subprocess.Popen(command, shell=True)
 
-    # Formata o Magic Packet usando o endereço MAC
-    mac_address = mac_address.replace('-', '').replace(':', '')
+                response_data = {"status": "success", "message": "Comando executado"}
+                self.wfile.write(json.dumps(response_data).encode())
+            else:
+                response_data = {"status": "error", "message": "Comando não reconhecido"}
+                self.wfile.write(json.dumps(response_data).encode())
+        else:
+            # Servir arquivos estáticos
+            super().do_GET()
 
-    # Adiciona um zero à frente se o comprimento da string for ímpar
-    if len(mac_address) % 2 != 0:
-        mac_address = '0' + mac_address
+    def ligar_pc(self):
+        # Código para ligar o PC
+        #AC-22-0B-2E-13-5C
+        #00-1A-7D-DA-71-10
+        mac_address = 'AC-22-0B-2E-13-5C'
+        # Cria um socket UDP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
-    try:
-        mac_hex = binascii.unhexlify(mac_address)
-        magic_packet = b'\xff' * 6 + mac_hex * 16
+        # Endereço de broadcast e porta padrão para WoL
+        broadcast_address = ('192.168.1.255', 7)
 
-        # Envia o Magic Packet
-        s.sendto(magic_packet, broadcast_address)
-        print("Magic Packet enviado com sucesso!")
+        # Formata o Magic Packet usando o endereço MAC
+        mac_address = mac_address.replace('-', '').replace(':', '')
 
-    except binascii.Error:
-        print("Erro: A string contém caracteres não hexadecimais.")
+        # Adiciona um zero à frente se o comprimento da string for ímpar
+        if len(mac_address) % 2 != 0:
+            mac_address = '0' + mac_address
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+        try:
+            mac_hex = binascii.unhexlify(mac_address)
+            magic_packet = b'\xff' * 6 + mac_hex * 16
+
+            # Envia o Magic Packet
+            s.sendto(magic_packet, broadcast_address)
+            print("Magic Packet enviado com sucesso!")
+
+        except binascii.Error:
+            print("Erro: A string contém caracteres não hexadecimais.")
+
+PORT = 8000
+Handler = MyRequestHandler
+
+with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    print(f"Servindo na porta {PORT}")
+    httpd.serve_forever()
