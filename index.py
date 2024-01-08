@@ -4,35 +4,15 @@ import subprocess
 import json
 import binascii
 import socket
-from urllib.parse import parse_qs
 
 class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        print(f"Recebida solicitação GET para {self.path}")
+
         if self.path == '/open_spotify':
-            # Adicionar cabeçalhos CORS
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
-            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type")
-            self.end_headers()
-
-            response_data = {"status": "success", "message": "Conexão estabelecida"}
-            self.wfile.write(json.dumps(response_data).encode())
+            self.handle_open_spotify()
         elif self.path == '/ligar_pc':
-            # Adicionar cabeçalhos CORS
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
-            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-            self.send_header("Access-Control-Allow-Headers", "Content-Type")
-            self.end_headers()
-
-            # Ligar o PC aqui
-            self.ligar_pc()
-
-            response_data = {"status": "success", "message": "PC ligado"}
-            self.wfile.write(json.dumps(response_data).encode())
+            self.handle_ligar_pc()
         else:
             # Servir arquivos estáticos
             super().do_GET()
@@ -72,6 +52,33 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
         else:
             # Servir arquivos estáticos
             super().do_GET()
+
+    def handle_open_spotify(self):
+        # Lógica para manipular a rota /open_spotify
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+        response_data = {"status": "success", "message": "Conexão estabelecida"}
+        self.wfile.write(json.dumps(response_data).encode())
+
+    def handle_ligar_pc(self):
+        # Lógica para manipular a rota /ligar_pc
+        self.send_response(200)
+        self.send_header("Content-type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")  # Isso permite qualquer origem
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
+
+        # Ligar o PC aqui
+        self.ligar_pc()
+
+        response_data = {"status": "success", "message": "PC ligado"}
+        self.wfile.write(json.dumps(response_data).encode())
 
     def ligar_pc(self):
         # Código para ligar o PC
