@@ -101,7 +101,8 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
         # Endereço de broadcast e porta padrão para WoL
-        broadcast_address = ('192.168.1.255', 7)
+        # broadcast_address = ('192.168.1.255', 7)
+        broadcast_address = ('255.255.255.255', 7)
 
         # Formata o Magic Packet usando o endereço MAC
         mac_address = mac_address.replace('-', '').replace(':', '')
