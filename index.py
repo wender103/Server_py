@@ -82,7 +82,8 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
     def ligar_pc(self):
         # Código para ligar o PC
-        mac_address = 'AC-22-0B-2E-13-5C'
+        #AC-22-0B-2E-13-5C
+        mac_address = '00-1A-7D-DA-71-10'
         # Cria um socket UDP
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
