@@ -4,7 +4,11 @@ import subprocess
 import json
 import binascii
 import socket
+import logging
 from urllib.parse import parse_qs
+
+# Configuração de logging
+logging.basicConfig(level=logging.INFO)
 
 class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -19,6 +23,10 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             response_data = {"status": "success", "message": "Conexão estabelecida"}
             self.wfile.write(json.dumps(response_data).encode())
+
+            # Log de sucesso no servidor
+            logging.info("Conexão estabelecida com sucesso.")
+
         elif self.path == '/ligar_pc':
             # Adicionar cabeçalhos CORS
             self.send_response(200)
@@ -33,6 +41,10 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             response_data = {"status": "success", "message": "PC ligado"}
             self.wfile.write(json.dumps(response_data).encode())
+
+            # Log de sucesso no servidor
+            logging.info("PC ligado com sucesso.")
+
         else:
             # Servir arquivos estáticos
             super().do_GET()
@@ -66,9 +78,15 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
                 response_data = {"status": "success", "message": "Comando executado"}
                 self.wfile.write(json.dumps(response_data).encode())
+
+                # Log de sucesso no servidor
+                logging.info("Comando 'Abrir Spotify' executado com sucesso.")
             else:
                 response_data = {"status": "error", "message": "Comando não reconhecido"}
                 self.wfile.write(json.dumps(response_data).encode())
+                # Log de erro no servidor
+                logging.error("Comando não reconhecido.")
+
         else:
             # Servir arquivos estáticos
             super().do_GET()
@@ -102,10 +120,14 @@ class MyRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         except binascii.Error:
             print("Erro: A string contém caracteres não hexadecimais.")
+            # Log de erro no servidor
+            logging.error("Erro: A string contém caracteres não hexadecimais.")
 
 PORT = 8000
 Handler = MyRequestHandler
 
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
     print(f"Servindo na porta {PORT}")
+    # Log de sucesso no servidor
+    logging.info(f"Servindo na porta {PORT}")
     httpd.serve_forever()
